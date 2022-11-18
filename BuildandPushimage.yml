@@ -20,8 +20,8 @@ stages:
       displayName: Build Job
       pool:
         vmImage: 'ubuntu-latest'
+
       steps:
-      
       # Task-1: Build Docker Image and push to Azure Container Registry ACR
       - task: Docker@2
         inputs:
@@ -29,4 +29,21 @@ stages:
           repository: 'testapp001'
           command: 'buildAndPush'
           Dockerfile: '**/Dockerfile'
-          tags: '$(tag)'
+          tags: |
+            $(tag)
+            $(Build.SourceVersion)
+
+    ## Publish Artifacts pipeline code in addition to Build and Push          
+      - bash: echo Contents in System Default Working Directory; ls -R $(System.DefaultWorkingDirectory)        
+      - bash: echo Before copying Contents in Build Artifact Directory; ls -R $(Build.ArtifactStagingDirectory)    
+
+     # Task-2: Copy kube-manifest files to Build Artifact Directory
+    # Source Directory: $(System.DefaultWorkingDirectory)/kube-manifests
+    # Target Directory: $(Build.ArtifactStagingDirectory)
+      - task: CopyFiles@2
+        inputs:
+         SourceFolder: '$(System.DefaultWorkingDirectory)/kube-manifests'
+         Contents: '**'
+         TargetFolder: '$(Build.ArtifactStagingDirectory)'
+         OverWrite: true
+
