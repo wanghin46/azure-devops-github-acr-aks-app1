@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testapp001-deployment
+  labels:
+    app: testapp001
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testapp001
+  template:
+    metadata:
+      labels:
+        app: testapp001
+    spec:
+      containers:
+        - name: testapp001
+          image: briantestregistry.azurecr.io/testapp001
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testapp001-loadbalancer-service
+  labels:
+    app: testapp001
+spec:
+  type: LoadBalancer
+  selector:
+    app: testapp001
+  ports:
+    - port: 80
+      targetPort: 80
